@@ -34,6 +34,9 @@ mod curves;
 
 mod fields;
 
+#[cfg(feature = "r1cs")]
+pub mod constraints;
+
 #[cfg(feature = "curve")]
 pub use curves::*;
 
