@@ -25,5 +25,6 @@ ark-algebra-test-templates = { version="^0.3.0", default-features = false }
 default = [ "curve" ]
 std = [ "ark-std/std", "ark-ff/std", "ark-ec/std" ]
 
-curve = [ "scalar_field" ]
+curve = [ "scalar_field", "base_field" ]
 scalar_field = []
+base_field = []
