@@ -340,14 +340,19 @@ impl CanonicalDeserializeWithFlags for Fq {
         // Calculate the number of bytes required to represent a field element
         // serialized with `flags`. If `F::BIT_SIZE < 8`,
         // this is at most `$byte_size + 1`
-        let output_byte_size = buffer_byte_size(<FqParameters as FpParameters>::MODULUS_BITS as usize + F::BIT_SIZE);
+        let output_byte_size = Self::zero().serialized_size_with_flags::<F>();
 
         const BYTE_SIZE: usize = <FqParameters as FpParameters>::MODULUS_BITS as usize / 8;
         let mut masked_bytes = [0; BYTE_SIZE + 1];
         reader.read_exact(&mut masked_bytes[..output_byte_size])?;
 
-        let flags = F::from_u8_remove_flags(&mut masked_bytes[output_byte_size - 1])
-            .ok_or(SerializationError::UnexpectedFlags)?;
+        let flags: F;
+        if F::BIT_SIZE > 0 {
+            flags = F::from_u8_remove_flags(&mut masked_bytes[output_byte_size - 1])
+                .ok_or(SerializationError::UnexpectedFlags)?;
+        } else {
+            flags = F::default();
+        }
 
         Ok((Self::read(&masked_bytes[..])?, flags))
     }
@@ -463,8 +468,50 @@ impl Field for Fq {
         <FqParameters as FpParameters>::MODULUS.as_ref()
     }
 
-    fn from_random_bytes_with_flags<F: Flags>(_bytes: &[u8]) -> Option<(Self, F)> {
-        todo!()
+    fn from_random_bytes_with_flags<F: Flags>(bytes: &[u8]) -> Option<(Self, F)> {
+        if F::BIT_SIZE > 8 {
+            return None
+        } else {
+            let mut result_bytes = [0u8; 32 + 1];
+            // Copy the input into a temporary buffer.
+            result_bytes.iter_mut().zip(bytes).for_each(|(result, input)| {
+                *result = *input;
+            });
+            // This mask retains everything in the last limb
+            // that is below `P::MODULUS_BITS`.
+            let last_limb_mask = (u64::MAX >> <FqParameters as FpParameters>::REPR_SHAVE_BITS).to_le_bytes();
+            let mut last_bytes_mask = [0u8; 9];
+            last_bytes_mask[..8].copy_from_slice(&last_limb_mask);
+
+
+            // Length of the buffer containing the field element and the flag.
+            let output_byte_size = buffer_byte_size(<FqParameters as FpParameters>::MODULUS_BITS as usize + F::BIT_SIZE);
+            // Location of the flag is the last byte of the serialized
+            // form of the field element.
+            let flag_location = output_byte_size - 1;
+
+            // At which byte is the flag located in the last limb?
+            let flag_location_in_last_limb = flag_location - (8 * 3);
+
+            // Take all but the last 9 bytes.
+            let last_bytes = &mut result_bytes[8 * 3..];
+
+            // The mask only has the last `F::BIT_SIZE` bits set
+            let flags_mask = u8::MAX.checked_shl(8 - (F::BIT_SIZE as u32)).unwrap_or(0);
+
+            // Mask away the remaining bytes, and try to reconstruct the
+            // flag
+            let mut flags: u8 = 0;
+            for (i, (b, m)) in last_bytes.iter_mut().zip(&last_bytes_mask).enumerate() {
+                if i == flag_location_in_last_limb {
+                    flags = *b & flags_mask
+                }
+                *b &= m;
+            }
+            Self::deserialize(&result_bytes[..32])
+                .ok()
+                .and_then(|f| F::from_u8(flags).map(|flag| (f, flag)))
+        }
     }
 
     #[inline]

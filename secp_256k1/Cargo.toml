@@ -29,7 +29,7 @@ ark-algebra-test-templates = { version = "^0.3.0", default-features = false }
 ark-curve-constraint-tests = { path = "../curve-constraint-tests", default-features = false }
 
 [features]
-default = [ "curve", "r1cs" ]
+default = [ "curve", "r1cs", "std" ]
 std = [ "ark-std/std", "ark-ff/std", "ark-ec/std" ]
 
 curve = [ "scalar_field", "base_field" ]
