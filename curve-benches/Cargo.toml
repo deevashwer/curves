@@ -45,6 +45,8 @@ ark-bw6-761 = { path = "../bw6_761" }
 ark-cp6-782 = { path = "../cp6_782" }
 ark-pallas = { path = "../pallas" }
 ark-vesta = { path = "../vesta" }
+ark-secp-256k1 = { path = "../secp_256k1" }
+ark-secq-256k1 = { path = "../secq_256k1" }
 
 [features]
 asm = [ "ark-ff/asm"]
@@ -112,4 +114,14 @@ harness = false
 [[bench]]
 name = "vesta"
 path = "benches/vesta.rs"
+harness = false
+
+[[bench]]
+name = "secp_256k1"
+path = "benches/secp_256k1.rs"
+harness = false
+
+[[bench]]
+name = "secq_256k1"
+path = "benches/secq_256k1.rs"
 harness = false
