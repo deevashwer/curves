@@ -567,7 +567,7 @@ impl FftField for Fq {
 }
 
 impl FpParameters for FqParameters {
-    // const MODULUS: Self::BigInt = BigInteger256([ 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xfffffffefffffc2f ]);
+    // little-endian
     const MODULUS: Self::BigInt = BigInteger256([ 0xfffffffefffffc2f, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff ]);
     const MODULUS_BITS: u32 = 256;
     const REPR_SHAVE_BITS: u32 = 0;
@@ -578,7 +578,7 @@ impl FpParameters for FqParameters {
     const CAPACITY: u32 = 255;
     const T: Self::BigInt = todo!();
     const T_MINUS_ONE_DIV_TWO: Self::BigInt = todo!();
-    // const MODULUS_MINUS_ONE_DIV_TWO: Self::BigInt = BigInteger256( [0x7fffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffff7ffffe17] );
+    // little-endian
     const MODULUS_MINUS_ONE_DIV_TWO: Self::BigInt = BigInteger256( [ 0xffffffff7ffffe17, 0xffffffffffffffff, 0xffffffffffffffff, 0x7fffffffffffffff ] );
 }
 
@@ -656,6 +656,10 @@ impl FromStr for Fq {
             Ok(res)
         }
     }
+}
+
+pub const fn fq_from_bytes(bytes: &[u8; 32]) -> Fq {
+    Fq { value: FieldElement::from_bytes_unchecked(bytes) }
 }
 
 impl PrimeField for Fq {

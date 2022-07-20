@@ -61,3 +61,4 @@ debug = true
 
 [patch.crates-io]
 ark-r1cs-std = { git = "https://github.com/deevashwer/r1cs-std/" }
+k256 = { git = "https://github.com/deevashwer/elliptic-curves/" }

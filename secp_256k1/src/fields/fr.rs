@@ -643,6 +643,10 @@ impl FromStr for Fr {
     }
 }
 
+pub const fn fr_from_bytes(bytes: &[u8; 32]) -> Fr {
+    Fr { value: Scalar::from_bytes_unchecked(bytes) }
+}
+
 impl PrimeField for Fr {
     type Params = FrParameters;
 
