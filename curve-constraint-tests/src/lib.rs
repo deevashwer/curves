@@ -332,7 +332,10 @@ pub mod curves {
             }
 
             let modulus_last_limb_bits = <C::ScalarField as PrimeField>::Params::MODULUS_BITS % 64;
-            *max.last_mut().unwrap() >>= 64 - modulus_last_limb_bits;
+            // can't right shift by 64
+            if modulus_last_limb_bits > 0 {
+                *max.last_mut().unwrap() >>= 64 - modulus_last_limb_bits;
+            }
             let scalars = [
                 C::ScalarField::rand(&mut rng).into_repr().as_ref().to_vec(),
                 vec![u64::rand(&mut rng)],
