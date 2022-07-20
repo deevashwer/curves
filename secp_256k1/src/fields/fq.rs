@@ -29,7 +29,7 @@ pub struct Fq {
 
 impl Fq {
     pub fn is_valid(&self) -> bool {
-        self < &Self::from(<FqParameters as FpParameters>::MODULUS)
+        self.into_repr() < <FqParameters as FpParameters>::MODULUS
     }
 }
 
@@ -141,12 +141,14 @@ impl AddAssign for Fq {
     #[inline]
     fn add_assign(&mut self, other: Self) {
         self.value.add_assign(other.value);
+        self.value = self.value.normalize();
     }
 }
 
 impl<'a> AddAssign<&'a Self> for Fq {
     fn add_assign(&mut self, other: &'a Self) {
-        self.value.add_assign(other.value)
+        self.value.add_assign(other.value);
+        self.value = self.value.normalize();
     }
 }
 
@@ -154,12 +156,14 @@ impl SubAssign for Fq {
     #[inline]
     fn sub_assign(&mut self, other: Self) {
         self.value.sub_assign(other.value);
+        self.value = self.value.normalize();
     }
 }
 
 impl<'a> SubAssign<&'a Self> for Fq {
     fn sub_assign(&mut self, other: &'a Self) {
         self.value.sub_assign(other.value);
+        self.value = self.value.normalize();
     }
 }
 
@@ -167,12 +171,14 @@ impl MulAssign for Fq {
     #[inline]
     fn mul_assign(&mut self, other: Self) {
         self.value.mul_assign(other.value);
+        self.value = self.value.normalize();
     }
 }
 
 impl<'a> MulAssign<&'a Self> for Fq {
     fn mul_assign(&mut self, other: &'a Self) {
         self.value.mul_assign(other.value);
+        self.value = self.value.normalize();
     }
 }
 
@@ -180,12 +186,14 @@ impl DivAssign for Fq {
     #[inline]
     fn div_assign(&mut self, other: Self) {
         self.value.mul_assign(other.value.invert().unwrap());
+        self.value = self.value.normalize();
     }
 }
 
 impl<'a> DivAssign<&'a Self> for Fq {
     fn div_assign(&mut self, other: &'a Self) {
         self.value.mul_assign(other.value.invert().unwrap());
+        self.value = self.value.normalize();
     }
 }
 
@@ -374,7 +382,7 @@ impl Neg for Fq {
     #[inline]
     #[must_use]
     fn neg(self) -> Self {
-        Self { value: self.value.neg().normalize_weak() } 
+        Self { value: self.value.neg().normalize() } 
     }
 }
 
@@ -446,7 +454,7 @@ impl Field for Fq {
 
     #[inline]
     fn double_in_place(&mut self) -> &mut Self {
-        self.value = self.value.double();
+        self.value = self.value.double().normalize();
         self
     }
 
@@ -467,7 +475,7 @@ impl Field for Fq {
     }
 
     fn square_in_place(&mut self) -> &mut Self {
-        self.value = self.value.square();
+        self.value = self.value.square().normalize();
         self
     }
 
@@ -485,7 +493,7 @@ impl Field for Fq {
     fn inverse_in_place(&mut self) -> Option<&mut Self> {
         let invert_value = self.value.invert();
         if bool::from(invert_value.is_some()) {
-            self.value = invert_value.unwrap();
+            self.value = invert_value.unwrap().normalize();
             Some(self)
         } else {
             None
@@ -499,7 +507,6 @@ impl SquareRootField for Fq {
     fn legendre(&self) -> ark_ff::LegendreSymbol {
         use ark_ff::fields::LegendreSymbol::*;
 
-        // s = self^((MODULUS - 1) // 2)
         let s = self.pow(<FqParameters as FpParameters>::MODULUS_MINUS_ONE_DIV_TWO);
         if s.is_zero() {
             Zero
@@ -524,7 +531,7 @@ impl SquareRootField for Fq {
     fn sqrt_in_place(&mut self) -> Option<&mut Self> {
         let sqrt_value = self.value.sqrt();
         if bool::from(sqrt_value.is_some()) {
-            self.value = sqrt_value.unwrap();
+            self.value = sqrt_value.unwrap().normalize();
             Some(self)
         } else {
             None
@@ -560,17 +567,19 @@ impl FftField for Fq {
 }
 
 impl FpParameters for FqParameters {
-    const MODULUS: Self::BigInt = BigInteger256([ 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xfffffffefffffc2f ]);
+    // const MODULUS: Self::BigInt = BigInteger256([ 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xfffffffefffffc2f ]);
+    const MODULUS: Self::BigInt = BigInteger256([ 0xfffffffefffffc2f, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff ]);
     const MODULUS_BITS: u32 = 256;
     const REPR_SHAVE_BITS: u32 = 0;
     const R: Self::BigInt = todo!();
     const R2: Self::BigInt = todo!();
     const INV: u64 = todo!();
-    const GENERATOR: Self::BigInt = todo!();//BigInteger256::from(3u64);
+    const GENERATOR: Self::BigInt = BigInteger256( [ 0x3, 0x0, 0x0, 0x0] );
     const CAPACITY: u32 = 255;
     const T: Self::BigInt = todo!();
     const T_MINUS_ONE_DIV_TWO: Self::BigInt = todo!();
-    const MODULUS_MINUS_ONE_DIV_TWO: Self::BigInt = BigInteger256( [0x7fffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffff7ffffe17] );
+    // const MODULUS_MINUS_ONE_DIV_TWO: Self::BigInt = BigInteger256( [0x7fffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffff7ffffe17] );
+    const MODULUS_MINUS_ONE_DIV_TWO: Self::BigInt = BigInteger256( [ 0xffffffff7ffffe17, 0xffffffffffffffff, 0xffffffffffffffff, 0x7fffffffffffffff ] );
 }
 
 impl From<num_bigint::BigUint> for Fq {

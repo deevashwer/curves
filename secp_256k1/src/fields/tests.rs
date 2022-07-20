@@ -12,6 +12,7 @@ fn test_fr() {
     let b: Fr = rng.gen();
     field_test(a, b);
     sqrt_field_test(a);
+    // primefield_test will fail because FftField is not implemented for Fr.
     primefield_test::<Fr>();
 }
 
@@ -22,5 +23,6 @@ fn test_fq() {
     let b: Fq = rng.gen();
     field_test(a, b);
     sqrt_field_test(a);
+    // primefield_test will fail because FftField is not implemented for Fq.
     primefield_test::<Fq>();
 }
