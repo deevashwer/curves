@@ -60,4 +60,4 @@ debug-assertions = true
 debug = true
 
 [patch.crates-io]
-ark-r1cs-std = { path = "/Users/deevashwer/arkworks/deevashwer-r1cs-std" }
+ark-r1cs-std = { git = "https://github.com/deevashwer/r1cs-std/" }
