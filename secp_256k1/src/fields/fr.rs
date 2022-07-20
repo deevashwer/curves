@@ -26,6 +26,10 @@ impl Fr {
     pub fn is_valid(&self) -> bool {
         self.into_repr() < <FrParameters as FpParameters>::MODULUS
     }
+
+    pub const fn from_bytes_unchecked(bytes: &[u8; 32]) -> Fr {
+        Fr { value: Scalar::from_bytes_unchecked(bytes) }
+    }
 }
 
 impl Zero for Fr {
@@ -688,10 +692,6 @@ impl FromStr for Fr {
             Ok(res)
         }
     }
-}
-
-pub const fn fr_from_bytes(bytes: &[u8; 32]) -> Fr {
-    Fr { value: Scalar::from_bytes_unchecked(bytes) }
 }
 
 impl PrimeField for Fr {

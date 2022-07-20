@@ -31,6 +31,10 @@ impl Fq {
     pub fn is_valid(&self) -> bool {
         self.into_repr() < <FqParameters as FpParameters>::MODULUS
     }
+
+    pub const fn from_bytes_unchecked(bytes: &[u8; 32]) -> Fq {
+        Fq { value: FieldElement::from_bytes_unchecked(bytes) }
+    }
 }
 
 impl Zero for Fq {
@@ -703,10 +707,6 @@ impl FromStr for Fq {
             Ok(res)
         }
     }
-}
-
-pub const fn fq_from_bytes(bytes: &[u8; 32]) -> Fq {
-    Fq { value: FieldElement::from_bytes_unchecked(bytes) }
 }
 
 impl PrimeField for Fq {

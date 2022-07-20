@@ -32,6 +32,7 @@ members = [
     "vesta",
 
     "secp_256k1",
+    "secq_256k1",
 ]
 
 [profile.release]
