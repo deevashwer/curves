@@ -22,14 +22,6 @@ fn test_fq() {
     let a: Fq = rng.gen();
     let b: Fq = rng.gen();
     field_test(a, b);
-    // let neg_sixteen = field_new!(Fq, "-16");
-    // println!("neg_sixteen: {:?}", neg_sixteen);
-    // let neg_sixteen_sqrt = neg_sixteen.sqrt().unwrap();
-    // println!("neg_sixteen_sqrt: {:?}", neg_sixteen_sqrt);
-    // println!("neg_sixteen_sqrt: {:?}", neg_sixteen_sqrt.into_repr().to_string());
-    // let sqrt_neg_sixteen = field_new!(Fq, "17631683881184975370165255887551781615748388533673675138860");
-    // let neg_sixteen_expected = sqrt_neg_sixteen * sqrt_neg_sixteen;
-    // println!("neg_sixteen_expected: {:?}", neg_sixteen_expected);
     sqrt_field_test(a);
     primefield_test::<Fq>();
 }
